@@ -9,6 +9,7 @@ import (
 	"runtime/debug"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/common-fate/clio"
 )
@@ -45,6 +46,12 @@ type checkResponse struct {
 //
 // 'prod' should be true if the build is a production build.
 func Check(app App, currentVersion string, prod bool, opts ...func(*Options)) {
+	vc := loadVersionConfig(app)
+	if time.Now().Weekday() == vc.LastCheckForUpdates {
+		clio.Debug("skipping update check until tomorrow")
+		return
+	}
+
 	// reset any existing messages
 	checks.mu.Lock()
 	defer checks.mu.Unlock()
@@ -69,6 +76,15 @@ func doCheck(app App, currentVersion string, prod bool, opts ...func(*Options)) 
 		clio.Debug("error when checking for updates: %s", err.Error())
 		return
 	}
+	vc := versionConfig{
+		app:                 app,
+		LastCheckForUpdates: time.Now().Weekday(),
+	}
+	err = vc.Save()
+	if err != nil {
+		clio.Debug("error saving version config: %s", err.Error())
+	}
+
 	if r.UpdateRequired {
 		checks.mu.Lock()
 		defer checks.mu.Unlock()
