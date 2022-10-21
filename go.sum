@@ -1,5 +1,7 @@
 github.com/common-fate/clio v0.1.0 h1:gu4WApUr9JQcKVZXneBPzKWOEtxX+X4mjZ+8k74eWrg=
 github.com/common-fate/clio v0.1.0/go.mod h1:8l2d683ocPKQ8k+GWg3tTPPmI3U9HXYtMPDIjPoA8ws=
+github.com/common-fate/clio v0.2.0 h1:SDDvkVH75zYh6A49DjJfa3TomEI7YAzmSAvMbd8pRQ4=
+github.com/common-fate/clio v0.2.0/go.mod h1:8l2d683ocPKQ8k+GWg3tTPPmI3U9HXYtMPDIjPoA8ws=
 github.com/fatih/color v1.13.0 h1:8LOYc1KYPPmyKMuN8QV2DNRWNbLo6LZ0iLs8+mlH53w=
 github.com/fatih/color v1.13.0/go.mod h1:kLAiJbzzSOZDVNGyDpeOxJ47H46qBXwg5ILebYFFOfk=
 github.com/mattn/go-colorable v0.1.9 h1:sqDoxXbdeALODt0DAeJCVp38ps9ZogZEAXjus69YV3U=

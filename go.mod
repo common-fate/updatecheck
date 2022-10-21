@@ -2,7 +2,7 @@ module github.com/common-fate/updatecheck
 
 go 1.19
 
-require github.com/common-fate/clio v0.1.0
+require github.com/common-fate/clio v0.2.0
 
 require (
 	github.com/fatih/color v1.13.0 // indirect
