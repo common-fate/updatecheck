@@ -54,7 +54,7 @@ func Check(app App, currentVersion string, prod bool, opts ...func(*Options)) {
 
 	vc := loadVersionConfig(app)
 	if time.Now().Weekday() == vc.LastCheckForUpdates {
-		clio.Debug("skipping update check until tomorrow")
+		clio.Debug("skipping update check until tomorrow, versionconfig = %s", vc.Path())
 		return
 	}
 
@@ -64,7 +64,7 @@ func Check(app App, currentVersion string, prod bool, opts ...func(*Options)) {
 	checks.msgs = nil
 
 	waitgroup.Add(1)
-	go doCheck(app, currentVersion, prod, opts...)
+	go doCheck(app, currentVersion, prod, vc, opts...)
 }
 
 // Print whether any updates are required.
@@ -75,27 +75,29 @@ func Print() {
 	}
 }
 
-func doCheck(app App, currentVersion string, prod bool, opts ...func(*Options)) {
+func doCheck(app App, currentVersion string, prod bool, vc versionConfig, opts ...func(*Options)) {
 	defer waitgroup.Done()
+	clio.Debug("checking for update, versionconfig = %s", vc.Path())
 	r, err := callCheckAPI(app, currentVersion, prod, opts...)
 	if err != nil {
 		clio.Debug("error when checking for updates: %s", err.Error())
 		return
 	}
-	vc := versionConfig{
-		app:                 app,
-		LastCheckForUpdates: time.Now().Weekday(),
-	}
+	vc.LastCheckForUpdates = time.Now().Weekday()
 	err = vc.Save()
 	if err != nil {
 		clio.Debug("error saving version config: %s", err.Error())
+		// don't return here, keep going so that we can print a message anyway.
 	}
 
-	if r.UpdateRequired {
-		checks.mu.Lock()
-		defer checks.mu.Unlock()
-		checks.msgs = append(checks.msgs, r.Message)
+	if !r.UpdateRequired {
+		clio.Debug("%s is up to date", app)
+		return
 	}
+
+	checks.mu.Lock()
+	defer checks.mu.Unlock()
+	checks.msgs = append(checks.msgs, r.Message)
 }
 
 func callCheckAPI(app App, currentVersion string, prod bool, opts ...func(*Options)) (*checkResponse, error) {
