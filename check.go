@@ -47,6 +47,19 @@ type checkResponse struct {
 //
 // 'prod' should be true if the build is a production build.
 func Check(app App, currentVersion string, prod bool, opts ...func(*Options)) {
+	o := Options{
+		Client: http.DefaultClient,
+		URL:    "https://update-dev.commonfate.io/check",
+	}
+
+	if prod {
+		o.URL = "https://update.commonfate.io/check"
+	}
+
+	for _, opt := range opts {
+		opt(&o)
+	}
+
 	if os.Getenv("GRANTED_DISABLE_UPDATE_CHECK") == "true" {
 		clio.Debug("GRANTED_DISABLE_UPDATE_CHECK env var is true, skipping update check")
 		return
@@ -54,7 +67,7 @@ func Check(app App, currentVersion string, prod bool, opts ...func(*Options)) {
 
 	vc := loadVersionConfig(app)
 	if time.Now().Weekday() == vc.LastCheckForUpdates {
-		clio.Debug("skipping update check until tomorrow, versionconfig = %s", vc.Path())
+		clio.Debug("skipping update check until tomorrow, versionconfig=%s", vc.Path())
 		return
 	}
 
@@ -64,7 +77,7 @@ func Check(app App, currentVersion string, prod bool, opts ...func(*Options)) {
 	checks.msgs = nil
 
 	waitgroup.Add(1)
-	go doCheck(app, currentVersion, prod, vc, opts...)
+	go doCheck(app, currentVersion, prod, vc, o)
 }
 
 // Print whether any updates are required.
@@ -77,10 +90,10 @@ func Print() {
 	}
 }
 
-func doCheck(app App, currentVersion string, prod bool, vc versionConfig, opts ...func(*Options)) {
+func doCheck(app App, currentVersion string, prod bool, vc versionConfig, opts Options) {
 	defer waitgroup.Done()
-	clio.Debug("checking for update, versionconfig = %s", vc.Path())
-	r, err := callCheckAPI(app, currentVersion, prod, opts...)
+	clio.Debug("checking for update, url=%s versionconfig=%s", opts.URL, vc.Path())
+	r, err := callCheckAPI(app, currentVersion, prod, opts)
 	if err != nil {
 		clio.Debug("error when checking for updates: %s", err.Error())
 		return
@@ -98,20 +111,7 @@ func doCheck(app App, currentVersion string, prod bool, vc versionConfig, opts .
 	checks.msgs = append(checks.msgs, r.Message)
 }
 
-func callCheckAPI(app App, currentVersion string, prod bool, opts ...func(*Options)) (*checkResponse, error) {
-	o := Options{
-		Client: http.DefaultClient,
-		URL:    "https://update-dev.commonfate.io/check",
-	}
-
-	if prod {
-		o.URL = "https://update.commonfate.io/check"
-	}
-
-	for _, opt := range opts {
-		opt(&o)
-	}
-
+func callCheckAPI(app App, currentVersion string, prod bool, opts Options) (*checkResponse, error) {
 	cr := checkRequest{
 		Application:  app,
 		Version:      currentVersion,
