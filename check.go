@@ -90,10 +90,10 @@ func Print() {
 	}
 }
 
-func doCheck(app App, currentVersion string, prod bool, vc versionConfig, opts Options) {
+func doCheck(app App, currentVersion string, prod bool, vc versionConfig, o Options) {
 	defer waitgroup.Done()
-	clio.Debug("checking for update, url=%s versionconfig=%s", opts.URL, vc.Path())
-	r, err := callCheckAPI(app, currentVersion, prod, opts)
+	clio.Debug("checking for update, url=%s versionconfig=%s", o.URL, vc.Path())
+	r, err := callCheckAPI(app, currentVersion, prod, o)
 	if err != nil {
 		clio.Debug("error when checking for updates: %s", err.Error())
 		return
@@ -111,7 +111,7 @@ func doCheck(app App, currentVersion string, prod bool, vc versionConfig, opts O
 	checks.msgs = append(checks.msgs, r.Message)
 }
 
-func callCheckAPI(app App, currentVersion string, prod bool, opts Options) (*checkResponse, error) {
+func callCheckAPI(app App, currentVersion string, prod bool, o Options) (*checkResponse, error) {
 	cr := checkRequest{
 		Application:  app,
 		Version:      currentVersion,
