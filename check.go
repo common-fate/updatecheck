@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"runtime"
 	"runtime/debug"
 	"strings"
@@ -46,6 +47,11 @@ type checkResponse struct {
 //
 // 'prod' should be true if the build is a production build.
 func Check(app App, currentVersion string, prod bool, opts ...func(*Options)) {
+	if os.Getenv("GRANTED_DISABLE_UPDATE_CHECK") == "true" {
+		clio.Debug("GRANTED_DISABLE_UPDATE_CHECK env var is true, skipping update check")
+		return
+	}
+
 	vc := loadVersionConfig(app)
 	if time.Now().Weekday() == vc.LastCheckForUpdates {
 		clio.Debug("skipping update check until tomorrow")
