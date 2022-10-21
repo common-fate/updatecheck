@@ -71,7 +71,9 @@ func Check(app App, currentVersion string, prod bool, opts ...func(*Options)) {
 func Print() {
 	waitgroup.Wait()
 	for _, msg := range checks.msgs {
-		clio.Info(msg)
+		if msg != "" {
+			clio.Info(msg)
+		}
 	}
 }
 
@@ -89,7 +91,7 @@ func doCheck(app App, currentVersion string, prod bool, vc versionConfig, opts .
 		clio.Debug("error saving version config: %s", err.Error())
 		// don't return here, keep going so that we can print a message anyway.
 	}
-	clio.Debug("update required: %s, message: %s", r.UpdateRequired, r.Message)
+	clio.Debug("update required: %v, message: %v", r.UpdateRequired, r.Message)
 
 	checks.mu.Lock()
 	defer checks.mu.Unlock()
