@@ -152,8 +152,12 @@ func userAgent() string {
 	return fmt.Sprintf("cf-updatecheck-go/%s %s (%s)", getLibraryVersion(), retrieveCallInfo(), runtime.GOOS)
 }
 
+// retrieveCallInfo finds the Go package that the update was called from to include in the user agent header.
 func retrieveCallInfo() string {
-	pc, _, _, _ := runtime.Caller(2)
+	pc, _, _, ok := runtime.Caller(3)
+	if !ok {
+		return ""
+	}
 	parts := strings.Split(runtime.FuncForPC(pc).Name(), ".")
 	pl := len(parts)
 	packageName := ""
