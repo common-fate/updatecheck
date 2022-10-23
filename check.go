@@ -65,8 +65,8 @@ func Check(app App, currentVersion string, prod bool, opts ...func(*Options)) {
 		return
 	}
 
-	vc := loadVersionConfig(app)
-	if time.Now().Weekday() == vc.LastCheckForUpdates {
+	vc, ok := loadVersionConfig(app)
+	if ok && time.Now().Weekday() == vc.LastCheckForUpdates {
 		clio.Debug("skipping update check until tomorrow, versionconfig=%s", vc.Path())
 		return
 	}

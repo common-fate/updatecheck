@@ -42,7 +42,7 @@ func (vc versionConfig) Save() error {
 	return nil
 }
 
-func loadVersionConfig(app App) (vc versionConfig) {
+func loadVersionConfig(app App) (vc versionConfig, ok bool) {
 	vc.app = app
 	cd, err := os.UserConfigDir()
 	if err != nil {
@@ -72,5 +72,6 @@ func loadVersionConfig(app App) (vc versionConfig) {
 		clio.Debug("error unmarshalling version config: %s", err.Error())
 		return
 	}
+	ok = true
 	return
 }
