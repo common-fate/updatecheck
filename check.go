@@ -104,7 +104,7 @@ func doCheck(app App, currentVersion string, prod bool, vc versionConfig, o Opti
 		clio.Debug("error saving version config: %s", err.Error())
 		// don't return here, keep going so that we can print a message anyway.
 	}
-	clio.Debug("update required: %v, message: %v", r.UpdateRequired, r.Message)
+	clio.Debugf("update required: %v, message: %v", r.UpdateRequired, r.Message)
 
 	checks.mu.Lock()
 	defer checks.mu.Unlock()
